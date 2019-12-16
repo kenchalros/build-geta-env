@@ -1,2 +1,2 @@
 # build-geta-env
-geta2が動作する環境を作成
+dockerでgeta2を動かす．
