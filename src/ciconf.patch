@@ -1,0 +1,704 @@
+diff -cr geta2/ext/wam/wam.xs geta_advance/ext/wam/wam.xs
+*** geta2/ext/wam/wam.xs	2001-05-17 13:28:40.000000000 +0900
+--- geta_advance/ext/wam/wam.xs	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 395,409 ****
+  	int arg
+  
+  int
+! init(projectroot)
+  	char *projectroot
+  
+  	CODE:
+  
+  	if (strEQ(projectroot, "")) {
+  		projectroot = NULL;
+  	}
+! 	RETVAL = wam_init(projectroot);
+  
+  	OUTPUT:
+  	RETVAL
+--- 395,410 ----
+  	int arg
+  
+  int
+! init(projectroot, ciconf)
+  	char *projectroot
++ 	char *ciconf
+  
+  	CODE:
+  
+  	if (strEQ(projectroot, "")) {
+  		projectroot = NULL;
+  	}
+! 	RETVAL = wam_init(projectroot, ciconf);
+  
+  	OUTPUT:
+  	RETVAL
+diff -cr geta2/lib/wam/aux2asc.c geta_advance/lib/wam/aux2asc.c
+*** geta2/lib/wam/aux2asc.c	2001-02-13 16:32:34.000000000 +0900
+--- geta_advance/lib/wam/aux2asc.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 45,51 ****
+  		progname = argv[0];
+  	}
+  
+! 	wam_init(NULL);
+  	stream = stdout;
+  
+  	if (argc!=4) {
+--- 45,51 ----
+  		progname = argv[0];
+  	}
+  
+! 	wam_init(NULL, NULL);
+  	stream = stdout;
+  
+  	if (argc!=4) {
+diff -cr geta2/lib/wam/ci.c geta_advance/lib/wam/ci.c
+*** geta2/lib/wam/ci.c	2001-09-06 15:23:29.000000000 +0900
+--- geta_advance/lib/wam/ci.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 118,125 ****
+  }
+  
+  int
+! ci_init(projectroot)
+  char *projectroot;
+  {
+  	int type;
+  	int i;
+--- 118,126 ----
+  }
+  
+  int
+! ci_init(projectroot, ciconf)
+  char *projectroot;
++ char *ciconf;
+  {
+  	int type;
+  	int i;
+***************
+*** 159,165 ****
+  	c = NULL;
+  	ndsets = 0;
+  
+! 	snprintf(ci_conf, sizeof ci_conf, "%s/etc/ci.conf", projectroot);
+  	if (!(f=fopen(ci_conf, "r"))) {
+  		perror(ci_conf);
+  		goto error;
+--- 160,166 ----
+  	c = NULL;
+  	ndsets = 0;
+  
+! 	snprintf(ci_conf, sizeof ci_conf, "%s", ciconf);
+  	if (!(f=fopen(ci_conf, "r"))) {
+  		perror(ci_conf);
+  		goto error;
+diff -cr geta2/lib/wam/ci.h geta_advance/lib/wam/ci.h
+*** geta2/lib/wam/ci.h	2001-03-25 06:25:28.000000000 +0900
+--- geta_advance/lib/wam/ci.h	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 18,24 ****
+  #define	CI_FLAGS		"flags"
+  #define	CI_DEFAULT_HANDLE	"default"
+  
+! int ci_init(char *);
+  /*
+  int ci_split_id(char *, char *, int *);
+  */
+--- 18,24 ----
+  #define	CI_FLAGS		"flags"
+  #define	CI_DEFAULT_HANDLE	"default"
+  
+! int ci_init(char *, char *);
+  /*
+  int ci_split_id(char *, char *, int *);
+  */
+diff -cr geta2/lib/wam/maw.c geta_advance/lib/wam/maw.c
+*** geta2/lib/wam/maw.c	2001-02-14 12:36:22.000000000 +0900
+--- geta_advance/lib/wam/maw.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 36,42 ****
+  	int n, nn;
+  	int flags = 0;
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 36,42 ----
+  	int n, nn;
+  	int flags = 0;
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/lib/wam/mkaux.c geta_advance/lib/wam/mkaux.c
+*** geta2/lib/wam/mkaux.c	2001-09-06 15:23:29.000000000 +0900
+--- geta_advance/lib/wam/mkaux.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 58,64 ****
+  	int strip_escs = 0;	/* not used */
+  	int do_chop = 0;
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 58,64 ----
+  	int strip_escs = 0;	/* not used */
+  	int do_chop = 0;
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/lib/wam/mkw.c geta_advance/lib/wam/mkw.c
+*** geta2/lib/wam/mkw.c	2001-09-06 15:23:29.000000000 +0900
+--- geta_advance/lib/wam/mkw.c	2007-10-24 12:02:59.000000000 +0900
+***************
+*** 93,98 ****
+--- 93,99 ----
+  char *argv[];
+  {
+  	char **freqfiles = NULL;
++ 	char *ciconf = NULL;
+  	int ctype = COMPRESSION_TYPE_NIB;
+  	struct timeval time_s, time_e;
+  	int ident, mtime;
+***************
+*** 104,110 ****
+  
+  	ident = 0;
+  
+! 	wam_init(NULL);
+  
+  	if (progname=rindex(argv[0], '/')) {
+  		progname++;
+--- 105,112 ----
+  
+  	ident = 0;
+  
+! 	ciconf = argv[3];
+! 	wam_init(NULL, ciconf);
+  
+  	if (progname=rindex(argv[0], '/')) {
+  		progname++;
+***************
+*** 183,190 ****
+  		exit(1);
+  	}
+  
+! 	if (argc==3) {
+! 		ctype = encode_compression_type(argv[2]);
+  	}
+  
+  	toplevel(handle, freqfiles, ctype, ident, mtime);
+--- 185,192 ----
+  		exit(1);
+  	}
+  
+! 	if (argc==4) {
+! 		ctype = encode_compression_type(argv[3]);
+  	}
+  
+  	toplevel(handle, freqfiles, ctype, ident, mtime);
+diff -cr geta2/lib/wam/mkxrm.c geta_advance/lib/wam/mkxrm.c
+*** geta2/lib/wam/mkxrm.c	2001-09-06 15:23:29.000000000 +0900
+--- geta_advance/lib/wam/mkxrm.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 64,70 ****
+  	int xr_row_orig, xr_col_orig;
+  	int xr_row_ref, xr_col_ref;
+  
+! 	wam_init(NULL);
+  
+  	if (progname=rindex(argv[0], '/')) {
+  		progname++;
+--- 64,70 ----
+  	int xr_row_orig, xr_col_orig;
+  	int xr_row_ref, xr_col_ref;
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname=rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/lib/wam/wam.c geta_advance/lib/wam/wam.c
+*** geta2/lib/wam/wam.c	2001-09-06 15:23:30.000000000 +0900
+--- geta_advance/lib/wam/wam.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 32,39 ****
+  #include "defs.h"
+  
+  int
+! wam_init(projectroot)
+  char *projectroot;
+  {
+  #if HAVE_IEEEFP_H && defined fpsetprec
+  #if 0
+--- 32,40 ----
+  #include "defs.h"
+  
+  int
+! wam_init(projectroot, ciconf)
+  char *projectroot;
++ char *ciconf;
+  {
+  #if HAVE_IEEEFP_H && defined fpsetprec
+  #if 0
+***************
+*** 45,51 ****
+  		return -1;
+  	}
+  	getaux_init(projectroot);
+! 	return ci_init(projectroot);
+  }
+  
+  int
+--- 46,52 ----
+  		return -1;
+  	}
+  	getaux_init(projectroot);
+! 	return ci_init(projectroot, ciconf);
+  }
+  
+  int
+diff -cr geta2/lib/wam/wam.h geta_advance/lib/wam/wam.h
+*** geta2/lib/wam/wam.h	2001-03-25 06:25:29.000000000 +0900
+--- geta_advance/lib/wam/wam.h	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 37,43 ****
+  
+  typedef struct wam_d WAM;
+  
+! int wam_init(char *);
+  int wam_assoc_fname(char *, struct wam_ab *);
+  WAM *wam_open(char *, int);
+  char *wam_name(WAM *);
+--- 37,43 ----
+  
+  typedef struct wam_d WAM;
+  
+! int wam_init(char *, char *);
+  int wam_assoc_fname(char *, struct wam_ab *);
+  WAM *wam_open(char *, int);
+  char *wam_name(WAM *);
+diff -cr geta2/swam/swam.c geta_advance/swam/swam.c
+*** geta2/swam/swam.c	2001-09-06 15:23:30.000000000 +0900
+--- geta_advance/swam/swam.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 449,455 ****
+  	if (!strcmp(projectroot, "")) {
+  		projectroot = NULL;
+  	}
+! 	if ((e = wam_init(projectroot))==-1) {
+  		err(stream, "");
+  		return;
+  	}
+--- 449,455 ----
+  	if (!strcmp(projectroot, "")) {
+  		projectroot = NULL;
+  	}
+! 	if ((e = wam_init(projectroot, NULL))==-1) {
+  		err(stream, "");
+  		return;
+  	}
+diff -cr geta2/testsuit/ddd.c geta_advance/testsuit/ddd.c
+*** geta2/testsuit/ddd.c	2001-09-06 15:23:30.000000000 +0900
+--- geta_advance/testsuit/ddd.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 44,50 ****
+  	char *handle;
+  	WAM *w;
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 44,50 ----
+  	char *handle;
+  	WAM *w;
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/testsuit/exp.c geta_advance/testsuit/exp.c
+*** geta2/testsuit/exp.c	2001-09-06 15:23:30.000000000 +0900
+--- geta_advance/testsuit/exp.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 39,45 ****
+  	WAM *w;
+  	int cnt;
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 39,45 ----
+  	WAM *w;
+  	int cnt;
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/testsuit/ppp.c geta_advance/testsuit/ppp.c
+*** geta2/testsuit/ppp.c	2001-09-06 15:23:30.000000000 +0900
+--- geta_advance/testsuit/ppp.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 89,95 ****
+  	fpsetprec(FP_PE);
+  */
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 89,95 ----
+  	fpsetprec(FP_PE);
+  */
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/testsuit/sss.c geta_advance/testsuit/sss.c
+*** geta2/testsuit/sss.c	2001-09-06 15:23:30.000000000 +0900
+--- geta_advance/testsuit/sss.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 42,48 ****
+  	char *path;
+  	WAM *w;
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 42,48 ----
+  	char *path;
+  	WAM *w;
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/testsuit/tst.c geta_advance/testsuit/tst.c
+*** geta2/testsuit/tst.c	2001-09-06 15:23:30.000000000 +0900
+--- geta_advance/testsuit/tst.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 23,29 ****
+  #include <string.h>
+  #include <syslog.h>
+  #include <unistd.h>
+! #include <varargs.h>
+  
+  #include <geta/wam.h>
+  #define	NEED_WEIGHT_TYPES
+--- 23,29 ----
+  #include <string.h>
+  #include <syslog.h>
+  #include <unistd.h>
+! #include <stdarg.h>
+  
+  #include <geta/wam.h>
+  #define	NEED_WEIGHT_TYPES
+***************
+*** 94,100 ****
+  	char const *text = "白珠者人尓不所知不知友縦雖不知吾之知有者不知友任意";
+  	char const *jma_path = "/var/users/nis/current/dw/man-cvt/man-ngrm-j";
+  
+! 	if (wam_init(dirname)==-1) {
+  		return -1;
+  	}
+  
+--- 94,100 ----
+  	char const *text = "白珠者人尓不所知不知友縦雖不知吾之知有者不知友任意";
+  	char const *jma_path = "/var/users/nis/current/dw/man-cvt/man-ngrm-j";
+  
+! 	if (wam_init(dirname, NULL)==-1) {
+  		return -1;
+  	}
+  
+diff -cr geta2/testsuit/ttt.c geta_advance/testsuit/ttt.c
+*** geta2/testsuit/ttt.c	2001-02-14 12:38:55.000000000 +0900
+--- geta_advance/testsuit/ttt.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 40,46 ****
+  	char *handle;
+  	WAM *w;
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 40,46 ----
+  	char *handle;
+  	WAM *w;
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/testsuit/uuu.c geta_advance/testsuit/uuu.c
+*** geta2/testsuit/uuu.c	2001-09-06 15:23:30.000000000 +0900
+--- geta_advance/testsuit/uuu.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 41,47 ****
+  	char *handle;
+  	WAM *w;
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 41,47 ----
+  	char *handle;
+  	WAM *w;
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/testsuit/vvv.c geta_advance/testsuit/vvv.c
+*** geta2/testsuit/vvv.c	2001-09-06 15:23:30.000000000 +0900
+--- geta_advance/testsuit/vvv.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 60,66 ****
+  	gettimeofday(&start, NULL);
+  #endif
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 60,66 ----
+  	gettimeofday(&start, NULL);
+  #endif
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/testsuit/www.c geta_advance/testsuit/www.c
+*** geta2/testsuit/www.c	2001-09-06 15:23:30.000000000 +0900
+--- geta_advance/testsuit/www.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 42,48 ****
+  	char *handle;
+  	WAM *w;
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 42,48 ----
+  	char *handle;
+  	WAM *w;
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/testsuit/xxx.c geta_advance/testsuit/xxx.c
+*** geta2/testsuit/xxx.c	2001-09-06 15:23:30.000000000 +0900
+--- geta_advance/testsuit/xxx.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 42,48 ****
+  	char *handle;
+  	WAM *w;
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 42,48 ----
+  	char *handle;
+  	WAM *w;
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/testsuit/yyy.c geta_advance/testsuit/yyy.c
+*** geta2/testsuit/yyy.c	2001-09-06 15:23:30.000000000 +0900
+--- geta_advance/testsuit/yyy.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 42,48 ****
+  	char *handle;
+  	WAM *w;
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 42,48 ----
+  	char *handle;
+  	WAM *w;
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/testsuit/zzz.c geta_advance/testsuit/zzz.c
+*** geta2/testsuit/zzz.c	2001-09-06 15:23:30.000000000 +0900
+--- geta_advance/testsuit/zzz.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 44,50 ****
+  	char *handle;
+  	WAM *w;
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 44,50 ----
+  	char *handle;
+  	WAM *w;
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/tools/ci_value/ci_value.c geta_advance/tools/ci_value/ci_value.c
+*** geta2/tools/ci_value/ci_value.c	2001-09-06 15:23:31.000000000 +0900
+--- geta_advance/tools/ci_value/ci_value.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 33,39 ****
+  {
+  	char *handle, *attribute, *value;
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 33,39 ----
+  {
+  	char *handle, *attribute, *value;
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/tools/dumpwam/dumpci.c geta_advance/tools/dumpwam/dumpci.c
+*** geta2/tools/dumpwam/dumpci.c	2001-09-06 15:23:31.000000000 +0900
+--- geta_advance/tools/dumpwam/dumpci.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 23,29 ****
+  	FILE *stream = stdout;
+  	char **handles;
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 23,29 ----
+  	FILE *stream = stdout;
+  	char **handles;
+  
+! 	wam_init(NULL,NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/tools/dumpwam/dumpcw.c geta_advance/tools/dumpwam/dumpcw.c
+*** geta2/tools/dumpwam/dumpcw.c	2001-09-06 15:23:31.000000000 +0900
+--- geta_advance/tools/dumpwam/dumpcw.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 33,39 ****
+  	int type = 0;
+  
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 33,39 ----
+  	int type = 0;
+  
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/tools/dumpwam/dumpwam.c geta_advance/tools/dumpwam/dumpwam.c
+*** geta2/tools/dumpwam/dumpwam.c	2001-02-14 12:37:43.000000000 +0900
+--- geta_advance/tools/dumpwam/dumpwam.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 49,55 ****
+  	int type = 0;
+  	WAM *w;
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 49,55 ----
+  	int type = 0;
+  	WAM *w;
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/tools/dumpwam/dumpxr.c geta_advance/tools/dumpwam/dumpxr.c
+*** geta2/tools/dumpwam/dumpxr.c	2001-03-25 06:25:30.000000000 +0900
+--- geta_advance/tools/dumpwam/dumpxr.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 36,42 ****
+  
+  	int type = 0;
+  
+! 	wam_init(NULL);
+  
+  	progname = argv[0];
+  
+--- 36,42 ----
+  
+  	int type = 0;
+  
+! 	wam_init(NULL, NULL);
+  
+  	progname = argv[0];
+  
+diff -cr geta2/tools/ww3/dumpwamf.c geta_advance/tools/ww3/dumpwamf.c
+*** geta2/tools/ww3/dumpwamf.c	2001-02-14 12:38:15.000000000 +0900
+--- geta_advance/tools/ww3/dumpwamf.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 51,57 ****
+  	int type = 0;
+  	WAM *w;
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 51,57 ----
+  	int type = 0;
+  	WAM *w;
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+diff -cr geta2/tools/ww3/ww3.c geta_advance/tools/ww3/ww3.c
+*** geta2/tools/ww3/ww3.c	2001-09-06 15:23:31.000000000 +0900
+--- geta_advance/tools/ww3/ww3.c	2007-10-24 11:52:17.000000000 +0900
+***************
+*** 79,85 ****
+  	WAM *w;
+  	char *xr_row_new;
+  
+! 	wam_init(NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
+--- 79,85 ----
+  	WAM *w;
+  	char *xr_row_new;
+  
+! 	wam_init(NULL, NULL);
+  
+  	if (progname = rindex(argv[0], '/')) {
+  		progname++;
