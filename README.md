@@ -1,7 +1,7 @@
 # build-geta-env
 dockerでgeta2が動作する環境を構築．
 
-## コンテナ作成までの手順
+## 環境構築
 ```bash
 $ git clone https://github.com/kenchalros/build-geta-env.git
 $ cd build-geta-env
