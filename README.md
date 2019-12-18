@@ -1,4 +1,5 @@
 # build-geta-env
+build environment for geta2
 
 ## setting
 ```bash
