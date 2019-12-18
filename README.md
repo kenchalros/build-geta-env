@@ -1,24 +1,23 @@
 # build-geta-env
-dockerでgeta2が動作する環境を構築．
 
-## 環境構築
+## setting
 ```bash
 $ git clone https://github.com/kenchalros/build-geta-env.git
 $ cd build-geta-env
 
-# geta-envイメージの作成
+# create docker image of geta-env
 $ docker build ./ -t geta-env-image
-# イメージからコンテナの作成
+# create docker container from docker image
 $ docker create --name geta-env -it geta-env-image /bin/bash
 ```
 
-### コンテナ起動 & bashでログイン
+### start container & bash login
 ```
 $ docker start geta-env
 $ docker exec -it geta-env /bin/bash
 ```
 
-### コンテナ停止
+### stop container
 ```
 $ docker stop geta-env
 ```
