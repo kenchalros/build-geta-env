@@ -1,5 +1,5 @@
 # build-geta-env
-build environment for geta2
+geta2を動かすための環境をDockerで構築する．
 
 ## setting
 ```bash
