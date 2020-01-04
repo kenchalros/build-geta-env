@@ -1,7 +1,26 @@
 FROM ubuntu:16.04
 
-RUN apt-get update \
-	&& apt-get install -y wget aptitude apt-utils patch gcc pmake build-essential vim mecab libmecab-dev mecab-ipadic-utf8
+RUN apt-get update && apt-get install -y \
+    wget \
+    aptitude \
+    apt-utils \
+    patch \
+    gcc \
+    pmake \
+    build-essential \
+    vim \
+    mecab \
+    libmecab-dev \
+    mecab-ipadic-utf8 \
+    curl \
+    language-pack-ja
+
+# bashのプラグイン導入
+RUN curl -fsSL https://starship.rs/install.sh -y | bash
+RUN echo 'eval "$(starship init bash)"' >> ~/.bashrc
+
+# シェルで日本語を表示する
+RUN echo 'export LANG=ja_JP.UTF-8' >> ~/.bashrc
 
 # ユーザーディレクトリの作成．ここで作業を行う
 RUN mkdir -p /home/user01
@@ -52,6 +71,13 @@ WORKDIR /home/user01/project/sample
 COPY ./src/sample.tgz ./
 RUN tar xvzf sample.tgz && \
     rm sample.tgz
+
+# 日本語sampleを動作させるためのディレクトリ作成
+RUN mkdir -p /home/user01/project/
+WORKDIR /home/user01/project/
+COPY ./src/jp-sample.tar.gz ./
+RUN tar xvzf jp-sample.tar.gz && \
+    rm jp-sample.tar.gz
 
 # ファイルの整理
 WORKDIR /home/user01/
