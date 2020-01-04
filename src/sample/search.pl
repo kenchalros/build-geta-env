@@ -4,6 +4,8 @@ BEGIN{
 }
 use Getopt::Std;
 use Tool;
+use Encode qw/encode decode/;
+
 getopts("hd:q:n:m:");
 if ($opt_h){
     print <<EOF;
@@ -21,8 +23,13 @@ my $n  = $opt_n ? $opt_n : 5;
 my $m  = $opt_m ? $opt_m : 5;
 &Tool::init($db);
 my ($doc,$word) = &Tool::getdocword($q);
-my @ws = sort {$b->{DF_d}<=>$a->{DF_d}} grep{($_->{name} !~ /:/)&&($_->{name} ne "z")} @$word;
 printf "%d %s\n",scalar @$doc,$q;
-for(my $i=0;($i<@ws)&&($i<$n);$i++){
-    printf "%2d %3d %7.4f %s\n",$i+1,$ws[$i]->{DF_d},$ws[$i]->{weight},$ws[$i]->{name};
+for(my $i=0;($i<$n)&&($i<@$doc);$i++){
+    my ($doci,$wordi) = &Tool::getdocword("i:$doc->[$i]{name}");
+    printf "%2d %s\n",$i+1,$doc->[$i]{name};
+    for(my $j=0;($j<@$wordi)&&($j<$m);$j++){
+        $name = encode('utf8',decode('ISO-2022-JP', $wordi->[$j]{name}));
+	    printf "  %2d %7.4f %s\n", $j+1, $wordi->[$j]{weight}, $name;
+    }
+    print "\n";
 }

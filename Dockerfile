@@ -66,24 +66,12 @@ RUN cd mecab-perl-0.996 && \
     perl Makefile.PL && \
     make && make install
 
-# sampleを動作させるためのディレクトリ作成
+# 日本語sampleを動作させるためのディレクトリ作成
 RUN mkdir -p /home/user01/project/sample
 WORKDIR /home/user01/project/sample
-COPY ./src/sample.tgz ./
-RUN tar xvzf sample.tgz && \
-    rm sample.tgz
-
-# 日本語sampleを動作させるためのディレクトリ作成
-RUN mkdir -p /home/user01/project/jp-sample
-WORKDIR /home/user01/project/jp-sample
-COPY ./src/jp-sample/. ./
-RUN mkdir -p ./wams/jp-sample/
-RUN touch ./wams/jp-sample/freqfile
-
-
-# COPY ./src/jp-sample.tar.gz ./
-# RUN tar xvzf jp-sample.tar.gz && \
-#     rm jp-sample.tar.gz
+COPY ./src/sample/. ./
+RUN mkdir -p ./wams/sample/
+RUN touch ./wams/sample/freqfiles
 
 # ファイルの整理
 WORKDIR /home/user01/

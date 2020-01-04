@@ -6,6 +6,7 @@ BEGIN{
 };
 use Getopt::Std;
 use wam('WAM_ROW','WAM_COL');
+use Encode qw/encode decode/;
 
 $w1;
 
@@ -39,14 +40,14 @@ sub getdoc{
 	$j++;
     }
     if ($j>0){
-        $rd = &wam::wsh($rq,$w1,WAM_COL,&wam::WT_SMART,10000000,0,$w1); # Ê¸½ñ¥ê¥¹¥È
+        $rd = &wam::wsh($rq,$w1,WAM_COL,&wam::WT_SMART,10000000,0,$w1); # Ê¸ï¿½ï¿½ê¥¹ï¿½ï¿½
     }
     return $rd;
 }
 
 sub getword {
     my $doc = shift;
-    my $rw = &wam::wsh($doc,$w1,WAM_ROW,&wam::WT_SMART,10000000,0,$w1); # Ã±¸ì¥ê¥¹¥È
+    my $rw = &wam::wsh($doc,$w1,WAM_ROW,&wam::WT_SMART,10000000,0,$w1); # Ã±ï¿½ï¿½ê¥¹ï¿½ï¿½
     return $rw;
 }
 
@@ -62,7 +63,7 @@ sub getwords {
     $doc->[0]{TF_d} = 1;
     $doc->[0]{weight} = 1;
     $doc->[0]{attr} = &wam::WSH_OR;
-    my $rw = &wam::wsh($doc,$w1,WAM_ROW,&wam::WT_SMART,10000000,0,$w1); # Ã±¸ì¥ê¥¹¥È
+    my $rw = &wam::wsh($doc,$w1,WAM_ROW,&wam::WT_SMART,10000000,0,$w1); # Ã±ï¿½ï¿½ê¥¹ï¿½ï¿½
     return $rw;
 }
 
@@ -72,19 +73,20 @@ sub getdocword{
     my $j = 0;
     my @ww = split(/[\s]+/,$w);
     for(my $i=0;$i<@ww;$i++){
-	my $id = &wam::name2id($w1,WAM_COL,$ww[$i]);
-	last unless $id;
-	$rq->[$j]{name} = $ww[$i];
-	$rq->[$j]{id} = $id;
-	$rq->[$j]{TF} = 1;
-	$rq->[$j]{TF_d} = 1;
-	$rq->[$j]{weight} = 1;
-	$rq->[$j]{attr} = $orflag ? &wam::WSH_OR :&wam::WSH_AND;
-	$j++;
+        my $w_encode = encode('ISO-2022-JP', decode('utf8', $ww[$i]));
+        my $id = &wam::name2id($w1,WAM_COL,$w_encode);
+        last unless $id;
+        $rq->[$j]{name} = $ww[$i];
+        $rq->[$j]{id} = $id;
+        $rq->[$j]{TF} = 1;
+        $rq->[$j]{TF_d} = 1;
+        $rq->[$j]{weight} = 1;
+        $rq->[$j]{attr} = $orflag ? &wam::WSH_OR :&wam::WSH_AND;
+        $j++;
     }
     if ($j>0){
-        $rd = &wam::wsh($rq,$w1,WAM_COL,&wam::WT_SMART,10000000,0,$w1); # Ê¸½ñ¥ê¥¹¥È
-	$rw = &wam::wsh($rd,$w1,WAM_ROW,&wam::WT_SMART,10000000,0,$w1); # Ã±¸ì¥ê¥¹¥È
+        $rd = &wam::wsh($rq,$w1,WAM_COL,&wam::WT_SMART,10000000,0,$w1); # Ê¸ï¿½ï¿½ê¥¹ï¿½ï¿½
+	    $rw = &wam::wsh($rd,$w1,WAM_ROW,&wam::WT_SMART,10000000,0,$w1); # Ã±ï¿½ï¿½ê¥¹ï¿½ï¿½
     }
     return ($rd,$rw);
 }
