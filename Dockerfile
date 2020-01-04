@@ -16,10 +16,11 @@ RUN apt-get update && apt-get install -y \
     language-pack-ja
 
 # bashのプラグイン導入
-RUN curl -fsSL https://starship.rs/install.sh -y | bash
-RUN echo 'eval "$(starship init bash)"' >> ~/.bashrc
+# スクリプトを別に用意して任意で導入できるようにする
+# RUN curl -fsSL https://starship.rs/install.sh -y | bash
+# RUN echo 'eval "$(starship init bash)"' >> ~/.bashrc
 
-# シェルで日本語を表示する
+# シェルで日本語を表示する（localeの設定）
 RUN echo 'export LANG=ja_JP.UTF-8' >> ~/.bashrc
 
 # ユーザーディレクトリの作成．ここで作業を行う
@@ -73,11 +74,16 @@ RUN tar xvzf sample.tgz && \
     rm sample.tgz
 
 # 日本語sampleを動作させるためのディレクトリ作成
-RUN mkdir -p /home/user01/project/
-WORKDIR /home/user01/project/
-COPY ./src/jp-sample.tar.gz ./
-RUN tar xvzf jp-sample.tar.gz && \
-    rm jp-sample.tar.gz
+RUN mkdir -p /home/user01/project/jp-sample
+WORKDIR /home/user01/project/jp-sample
+COPY ./src/jp-sample/. ./
+RUN mkdir -p ./wams/jp-sample/
+RUN touch ./wams/jp-sample/freqfile
+
+
+# COPY ./src/jp-sample.tar.gz ./
+# RUN tar xvzf jp-sample.tar.gz && \
+#     rm jp-sample.tar.gz
 
 # ファイルの整理
 WORKDIR /home/user01/
