@@ -1,7 +1,22 @@
 FROM ubuntu:16.04
 
-RUN apt-get update \
-	&& apt-get install -y wget aptitude apt-utils patch gcc pmake build-essential vim mecab libmecab-dev mecab-ipadic-utf8
+RUN apt-get update && apt-get install -y \
+    wget \
+    aptitude \
+    apt-utils \
+    patch \
+    gcc \
+    pmake \
+    build-essential \
+    vim \
+    mecab \
+    libmecab-dev \
+    mecab-ipadic-utf8 \
+    curl \
+    language-pack-ja
+
+# シェルで日本語を表示する（localeの設定）
+RUN echo 'export LANG=ja_JP.UTF-8' >> ~/.bashrc
 
 # ユーザーディレクトリの作成．ここで作業を行う
 RUN mkdir -p /home/user01
@@ -46,12 +61,12 @@ RUN cd mecab-perl-0.996 && \
     perl Makefile.PL && \
     make && make install
 
-# sampleを動作させるためのディレクトリ作成
+# 日本語sampleを動作させるためのディレクトリ作成
 RUN mkdir -p /home/user01/project/sample
 WORKDIR /home/user01/project/sample
-COPY ./src/sample.tgz ./
-RUN tar xvzf sample.tgz && \
-    rm sample.tgz
+COPY ./src/sample/. ./
+RUN mkdir -p ./wams/sample/
+RUN touch ./wams/sample/freqfiles
 
 # ファイルの整理
 WORKDIR /home/user01/
