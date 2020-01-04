@@ -36,3 +36,11 @@ $ mkw sample wams/sample/freqfile ci.conf
 # ここまでで準備は完了．あとは適当に動かしてみる．
 $ perl search.pl -q hoge
 ```
+
+## appendix
+### bashのプラグイン導入
+bashの見た目をいい感じにしてくれる
+```
+$ curl -fsSL https://starship.rs/install.sh | bash
+$ echo 'eval "$(starship init bash)"' >> ~/.bashrc
+```

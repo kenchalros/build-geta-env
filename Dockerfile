@@ -15,11 +15,6 @@ RUN apt-get update && apt-get install -y \
     curl \
     language-pack-ja
 
-# bashのプラグイン導入
-# スクリプトを別に用意して任意で導入できるようにする
-# RUN curl -fsSL https://starship.rs/install.sh -y | bash
-# RUN echo 'eval "$(starship init bash)"' >> ~/.bashrc
-
 # シェルで日本語を表示する（localeの設定）
 RUN echo 'export LANG=ja_JP.UTF-8' >> ~/.bashrc
 
