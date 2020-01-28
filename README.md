@@ -31,6 +31,9 @@ $ cd /home/user01/project/sample
 $ perl mkfreq.pl > wams/sample/freqfile
 # 文字コードを変更
 $ nkf -j --overwrite wams/sample/freqfile
+## 文字コードが変換できない文字が含まれている可能性があるため、以下のコマンドを推奨
+## $ nkf -j --no-best-fit-chars --fb-perl --overwrite freqfile
+
 # wamファイルの作成
 $ mkw sample wams/sample/freqfile ci.conf
 # ここまでで準備は完了．あとは適当に動かしてみる．
